@@ -6790,7 +6790,9 @@ static Function *emit_modifyhelper(jl_codectx_t &ctx2, const jl_cgval_t &op, con
     if (gcstack_arg) {
         w->setCallingConv(CallingConv::Swift);
         AttrBuilder param(ctx.builder.getContext());
-        param.addAttribute(Attribute::SwiftSelf);
+        param.addAttribute("gcstack");
+        if (ctx.emission_context.use_swiftcc)
+            param.addAttribute(Attribute::SwiftSelf);
         param.addAttribute(Attribute::NonNull);
         Argument *gcstackarg = &*AI++;
         gcstackarg->addAttrs(param);
@@ -7966,6 +7968,7 @@ static jl_returninfo_t get_specsig_function(jl_codegen_params_t &params, Module 
         AttrBuilder param(M->getContext());
         if (params.use_swiftcc)
             param.addAttribute(Attribute::SwiftSelf);
+        param.addAttribute("gcstack");
         param.addAttribute(Attribute::NonNull);
         attrs.push_back(AttributeSet::get(M->getContext(), param));
         fsig.push_back(PointerType::get(M->getContext(), 0));
